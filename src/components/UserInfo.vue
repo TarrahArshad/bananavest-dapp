@@ -40,9 +40,15 @@
             <span class="info-label">Name:</span>
             <span class="info-value">{{ userStore.userInfo.name || 'Not set' }}</span>
           </div>
+          
+          <div class="info-row">
+            <span class="info-label">Join Date:</span>
+            <span class="info-value">{{ formatDate(userStore.userInfo.joinTime) }}</span>
+          </div>
         </template>
       </div>
 
+      <!-- Balances Section -->
       <div v-if="userStore.userInfo?.isRegistered" class="balances">
         <h3><i class="fas fa-coins"></i> My Balances</h3>
         
@@ -72,6 +78,11 @@
         </div>
       </div>
       
+      <!-- Flash Timer Component (only for registered users) -->
+      <div v-if="userStore.userInfo?.isRegistered" class="flash-wrapper">
+        <FlashTimer />
+      </div>
+      
       <div v-else-if="userStore.isWalletConnected" class="not-registered">
         <i class="fas fa-exclamation-circle"></i>
         <p>You are not registered yet. Please join the network using the form below.</p>
@@ -91,11 +102,18 @@ import { onMounted, watch } from 'vue'
 import { useUserStore } from '../stores/userStore'
 import { useContractStore } from '../stores/contractStore'
 import { useNetworkStore } from '../stores/networkStore'
+import FlashTimer from './FlashTimer.vue'
 
 // Initialize stores
 const userStore = useUserStore()
 const contractStore = useContractStore()
 const networkStore = useNetworkStore()
+
+// Helper function
+const formatDate = (timestamp) => {
+  if (!timestamp) return 'N/A'
+  return new Date(timestamp * 1000).toLocaleString()
+}
 
 // Load user data when wallet connects
 watch(() => userStore.isWalletConnected, async (connected) => {
@@ -125,6 +143,7 @@ onMounted(async () => {
   padding: 20px;
   border-radius: 15px;
   border: 1px solid #e0e0e0;
+  margin-bottom: 20px;
 }
 
 .info-row {
@@ -157,7 +176,7 @@ onMounted(async () => {
 }
 
 .balances {
-  margin-top: 25px;
+  margin-top: 20px;
   padding-top: 20px;
   border-top: 2px solid #e0e0e0;
 }
@@ -190,6 +209,12 @@ onMounted(async () => {
   font-size: 16px;
 }
 
+.flash-wrapper {
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 2px solid #e0e0e0;
+}
+
 .not-connected, .not-registered, .loading-info {
   text-align: center;
   padding: 40px 20px;
@@ -210,11 +235,6 @@ onMounted(async () => {
 
 .loading-info i {
   color: #667eea;
-}
-
-.not-connected p, .not-registered p, .loading-info p {
-  font-size: 14px;
-  margin-top: 10px;
 }
 
 .alert {
